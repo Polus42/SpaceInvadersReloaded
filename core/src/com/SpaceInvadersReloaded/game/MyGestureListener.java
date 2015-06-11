@@ -27,8 +27,14 @@ public class MyGestureListener implements GestureDetector.GestureListener {
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-        Vector2 v = new Vector2(cam.unproject(new Vector3(x,y,0f)).x,cam.unproject(new Vector3(x,y,0f)).y);
-        cm.shoot(cm.getW(),v);
+        if (x>Gdx.graphics.getWidth()/2&&y<Gdx.graphics.getHeight()/2)
+        {
+            cm.gearUp();
+        }
+        if (x>Gdx.graphics.getWidth()/2&&y>Gdx.graphics.getHeight()/2)
+        {
+            cm.gearDown();
+        }
         return false;
     }
 
@@ -40,7 +46,6 @@ public class MyGestureListener implements GestureDetector.GestureListener {
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
-        cm.move(-velocityX/250);
         return false;
     }
 
@@ -58,6 +63,7 @@ public class MyGestureListener implements GestureDetector.GestureListener {
 
     @Override
     public boolean zoom (float originalDistance, float currentDistance){
+        cam.zoom = originalDistance/currentDistance;
 
         return false;
     }
