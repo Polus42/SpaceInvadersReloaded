@@ -1,17 +1,12 @@
 package com.SpaceInvadersReloaded.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.ArrayList;
-import java.util.Stack;
 
 /**
  * Created by figiel-paul on 09/06/15.
@@ -27,9 +22,11 @@ public class Road {
     private float BITLENGHT = 10;
     private float DISTANCE = 40; // distance of generation
     private float STRENGHT = 10; // strenght of generation
+    private Horde h;
 
-    Road(World world)
+    public Road(World world)
     {
+        h = new Horde(world);
         this.world=world;
         vector2Stack = new Array<Vector2>();
         BodyDef groundBodyDef = new BodyDef();
@@ -76,13 +73,14 @@ public class Road {
     }
     public void createRoad(Vector2 player)
     {
+        h.autoMove(player);
         if (vector2Stack.peek().x-player.x<DISTANCE)
         {
             add(new Vector2(vector2Stack.peek().x + BITLENGHT, generator(player.x)*STRENGHT ));
             float random = (float) Math.floor(Math.random()*6);
             if (random == 5)
             {
-                Alien a = new Alien(world,vector2Stack.peek().x,generator(player.x)*STRENGHT+5);
+                h.spawn(vector2Stack.peek().x,generator(player.x)*STRENGHT+5);
             }
 
         }

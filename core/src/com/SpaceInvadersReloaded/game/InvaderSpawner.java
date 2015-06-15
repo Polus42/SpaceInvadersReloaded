@@ -2,7 +2,6 @@ package com.SpaceInvadersReloaded.game;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class InvaderSpawner {
             listeinvader.add(new Invader(w,posX,posY));
         }
     }
-    public void autoMove(CanonMan c)
+    public void autoMove(Truck c)
     {
         for (Invaders i : listeinvader)
         {

@@ -1,6 +1,5 @@
 package com.SpaceInvadersReloaded.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -111,7 +110,7 @@ public class BigInvader implements Invaders {
         this.world = w;
     }
     @Override
-    public void autoMove(CanonMan cm) {
+    public void autoMove(Truck cm) {
         // Si trop à droite
         if (!listecube.isEmpty()&&centercube!=null)
         {
@@ -139,7 +138,7 @@ public class BigInvader implements Invaders {
     }
 
     @Override
-    public void shoot(CanonMan cm) {
+    public void shoot(Truck cm) {
 
     }
 

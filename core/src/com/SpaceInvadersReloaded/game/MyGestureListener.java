@@ -4,17 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-
-import javafx.scene.Camera;
 
 /**
  * Created by figiel-paul on 02/06/15.
  */
 public class MyGestureListener implements GestureDetector.GestureListener {
-    private CanonMan cm;
+    private Truck cm;
     private OrthographicCamera cam;
-    public void initialize(CanonMan c,OrthographicCamera cam)
+    public void initialize(Truck c,OrthographicCamera cam)
     {
         cm = c;
         this.cam = cam;

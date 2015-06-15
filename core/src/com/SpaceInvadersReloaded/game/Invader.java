@@ -1,6 +1,5 @@
 package com.SpaceInvadersReloaded.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -9,18 +8,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Joint;
-import com.badlogic.gdx.physics.box2d.JointDef;
-import com.badlogic.gdx.physics.box2d.JointEdge;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
-import com.badlogic.gdx.physics.box2d.joints.WeldJoint;
-import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.ArrayList;
 
 /**
  * Created by figiel-paul on 04/06/15.
@@ -103,7 +94,7 @@ public class Invader implements Invaders {
      * Gestion des deplacements de l'invader en fonction de la position d'un autre individu
      * @param cm
      */
-    public void autoMove(CanonMan cm)
+    public void autoMove(Truck cm)
     {
         // Si trop à droite
             if (invaderbody.getWorldCenter().x>cm.getCenter().x+1)
@@ -131,7 +122,7 @@ public class Invader implements Invaders {
     /**
      * Tire !
      */
-    public void shoot(CanonMan cm)
+    public void shoot(Truck cm)
     {
 
     }

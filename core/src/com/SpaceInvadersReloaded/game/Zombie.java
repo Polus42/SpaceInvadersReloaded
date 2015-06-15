@@ -16,6 +16,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
 import java.util.ArrayList;
@@ -23,20 +25,22 @@ import java.util.ArrayList;
 /**
  * Created by figiel-paul on 07/06/15.
  */
-public class Alien {
+public class Zombie {
     private World world;
-    private float HAUTEUR = 2;
-    private float LARGEUR = 0.6f;
+    private float HAUTEUR = 4;
+    private float LARGEUR = 1.2f;
     private Body alienbody;
     private Body alienarm;
     private Body alienhead;
+    private RevoluteJoint armjoint;
     private ArrayList<Body> bodylist = new ArrayList<Body>();
     // PolygonSpriteBatch necessaire au dessin du personnage
     private PolygonSpriteBatch polyBatch;
     private PolygonRegion polyReg;
     private boolean DEAD;
+    private float FRICTION = 0.5f;
 
-    Alien(World world,float posX,float posY)
+    public Zombie(World world, float posX, float posY)
     {
         this.world = world;
         DEAD = false;
@@ -56,7 +60,7 @@ public class Alien {
         FixtureDef squarefixture = new FixtureDef();
         squarefixture.shape = squareshape;
         squarefixture.density = 30f;
-        squarefixture.friction = 0.5f;
+        squarefixture.friction = FRICTION;
         squarefixture.restitution = 0.1f; // Make it bounce a little bit
         squarefixture.filter.maskBits=0x0004|0x0001|0x0006; // I will collide with... | que des nombres pairs!
         squarefixture.filter.categoryBits=0x0006; // I am a
@@ -64,6 +68,7 @@ public class Alien {
         BodyUserData bud1 = new BodyUserData(BodyUserData.State.IS_ALIEN);
         bud1.setObjectdata(this);
         alienbody.setUserData(bud1);
+        alienbody.setFixedRotation(false);
         squareshape.dispose();
 
         // Bras
@@ -82,7 +87,7 @@ public class Alien {
         FixtureDef armfixture = new FixtureDef();
         armfixture.shape = alienshape;
         armfixture.density = 10f;
-        armfixture.friction = 0.5f;
+        armfixture.friction = FRICTION;
         armfixture.restitution = 0.1f; // Make it bounce a little bit
         armfixture.filter.maskBits=0x0004|0x0001|0x0006; // I will collide with... | que des nombres pairs!
         armfixture.filter.categoryBits=0x0006; // I am a
@@ -108,7 +113,7 @@ public class Alien {
         FixtureDef headfixture = new FixtureDef();
         headfixture.shape = headshape;
         headfixture.density = 10f;
-        headfixture.friction = 0.5f;
+        headfixture.friction = FRICTION;
         headfixture.restitution = 0.1f; // Make it bounce a little bit
         headfixture.filter.maskBits=0x0004|0x0001|0x0006; // I will collide with... | que des nombres pairs!
         headfixture.filter.categoryBits=0x0006; // I am a
@@ -120,17 +125,19 @@ public class Alien {
         headshape.dispose();
 
         // Attache le bras au corps
-        WeldJointDef wjd = new WeldJointDef();
-        wjd.initialize(alienarm, alienbody, alienbody.getWorldCenter());
-        wjd.frequencyHz = 5;
-        wjd.dampingRatio = 1;
-        wjd.collideConnected = false;
-        world.createJoint(wjd);
+        RevoluteJointDef rjd = new RevoluteJointDef();
+        rjd.initialize(alienarm, alienbody, new Vector2(alienarm.getWorldCenter().x-1f,alienarm.getWorldCenter().y));
+        rjd.enableMotor = true;
+        rjd.maxMotorTorque = 500;
+        rjd.collideConnected = false;
+        rjd.enableLimit = true;
+        armjoint = (RevoluteJoint) world.createJoint(rjd);
+        armjoint.setLimits((float) (Math.toRadians(0)),(float) (Math.toRadians(180)));
         // Attache tete au corps
         WeldJointDef wjd2 = new WeldJointDef();
         wjd2.initialize(alienhead, alienbody, alienbody.getWorldCenter());
-        wjd2.frequencyHz = 10;
-        wjd2.dampingRatio = 15;
+        wjd2.frequencyHz = 0;
+        wjd2.dampingRatio = 1000;
         wjd2.collideConnected = false;
         world.createJoint(wjd2);
         // Add bodies to bodylist
@@ -138,15 +145,15 @@ public class Alien {
         bodylist.add(alienbody);
         bodylist.add(alienhead);
         // Initialisation de l'affichage
-        initializeDrawing();
+        //initializeDrawing();
     }
     private void lookRight()
     {
-        //alienarm.setTransform(alienbody.getPosition().x-LARGEUR /2,alienbody.getPosition().y+ HAUTEUR /2,0);
+        armjoint.setMotorSpeed(-5);
     }
     private void lookLeft()
     {
-        //alienarm.setTransform(-0.3f,1,0);
+        armjoint.setMotorSpeed(5);
     }
 
     public void autoMove(Vector2 position)
@@ -156,12 +163,14 @@ public class Alien {
             if (position.x<alienbody.getWorldCenter().x)
             {
                 lookLeft();
-                alienbody.setLinearVelocity(-0.5f,0);
+                alienbody.applyForceToCenter(-alienbody.getMass() * 15, 0,true);
+                alienbody.applyAngularImpulse(-alienbody.getAngle()*100,true);
             }
             else
             {
                 lookRight();
-                alienbody.setLinearVelocity(0.5f,0);
+                alienbody.applyForceToCenter(alienbody.getMass() * 15, 0,true);
+                alienbody.applyAngularImpulse(-alienbody.getAngle()*100,true);
             }
         }
     }

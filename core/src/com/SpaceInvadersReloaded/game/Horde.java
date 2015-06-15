@@ -11,27 +11,27 @@ import java.util.ArrayList;
  * Created by figiel-paul on 08/06/15.
  */
 public class Horde {
-    private ArrayList<Alien> alienlist;
+    private ArrayList<Zombie> alienlist;
     private World world;
     Horde(World box2Dworld)
     {
         this.world  = box2Dworld;
-        alienlist = new ArrayList<Alien>();
+        alienlist = new ArrayList<Zombie>();
     }
     public void spawn(float x,float y)
     {
-        alienlist.add(new Alien(world,x,y));
+        alienlist.add(new Zombie(world,x,y));
     }
     public void draw(OrthographicCamera cam,ShapeRenderer shapeRenderer)
     {
-        for (Alien a : alienlist)
+        for (Zombie a : alienlist)
         {
             a.draw(cam,shapeRenderer);
         }
     }
     public void autoMove(Vector2 vector2)
     {
-        for (Alien a : alienlist)
+        for (Zombie a : alienlist)
         {
             a.autoMove(vector2);
         }
