@@ -6,8 +6,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -15,8 +17,7 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 
-import box2dLight.ConeLight;
-import box2dLight.DirectionalLight;
+import box2dLight.PointLight;
 import box2dLight.RayHandler;
 
 /**
@@ -36,6 +37,10 @@ public class PlayingState implements GameState {
     private RayHandler rayHandler;
     private SpriteBatch spriteBatch;
     private GestionContact gestionContact;
+    private Player player;
+    private PolygonSpriteBatch polygonSpriteBatch;
+    private ShapeRenderer shapeRenderer;
+    private SkyScraper s;
 
 
     public PlayingState(GameClass gameClass)
@@ -54,13 +59,14 @@ public class PlayingState implements GameState {
         box2DDebugRenderer = new Box2DDebugRenderer();
         rayHandler = new RayHandler(world);
         //
-        road = new Road(world);
-        truck = new Truck(world,3,10);
-        horde = new Horde(world);
+        //road = new Road(world);
+        //truck = new Truck(world,rayHandler,3,10);
+        player = new Player(world,100,6,4);
+        //horde = new Horde(world);
         // Init bitmap font
         if (Gdx.app.getType()== Application.ApplicationType.Desktop)
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.local("fonts/stocky.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.local("fonts/HACKED.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 30;
             bitmapFont = generator.generateFont(parameter); // font size 12 pixels
@@ -68,7 +74,7 @@ public class PlayingState implements GameState {
         }
         else
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/stocky.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/HACKED.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 30;
             bitmapFont = generator.generateFont(parameter); // font size 12 pixels
@@ -76,7 +82,7 @@ public class PlayingState implements GameState {
         }
         // Init input
         myGestureListener = new MyGestureListener();
-        myGestureListener.initialize(truck,orthographicCamera);
+        myGestureListener.initialize(player,orthographicCamera);
         //
         garbageDestructor = new GarbageDestructor(world);
         //
@@ -86,6 +92,18 @@ public class PlayingState implements GameState {
         gestionContact.initialize(world);
         world.setContactListener(gestionContact);
         Gdx.input.setInputProcessor(new GestureDetector(myGestureListener));
+        //
+        rayHandler.setBlur(true);
+        //
+        polygonSpriteBatch = new PolygonSpriteBatch();
+        // Init drawing
+        shapeRenderer = new ShapeRenderer();
+        // ------------------------------------------
+        Room r = new Room(world,3,3,30);
+        PointLight pl = new PointLight(rayHandler,100,new Color(1,1,1,1),20,10,7);
+        r.generate();
+        s = new SkyScraper(world,0,0,player);
+        s.setCurrentRoom(r);
     }
 
     @Override
@@ -95,25 +113,34 @@ public class PlayingState implements GameState {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         orthographicCamera.update();
-
-
-        road.createRoad(truck.getCenter());
-        horde.autoMove(truck.getCenter());
-        //Gestion de la camera
-        centerCamera(100);
-
         rayHandler.setCombinedMatrix(orthographicCamera.combined);
-        rayHandler.updateAndRender();
-        spriteBatch.begin();
-        bitmapFont.draw(spriteBatch, truck.essai(), 20, 20);
-        bitmapFont.draw(spriteBatch, "GEAR UP", 420, 450);
-        bitmapFont.draw(spriteBatch, "GEAR DOWN", 420, 100);
-        bitmapFont.draw(spriteBatch, "GEAR :" + Integer.toString(truck.getGEAR()), 420, 300);
-        spriteBatch.end();
+
+        //Gestion de la camera
+        centerCamera(player.getCenter().x, player.getCenter().y, 100);
+        //truck.updateLight();
+
         //
         orthographicCamera.update();
         box2DDebugRenderer.setDrawJoints(true);
         box2DDebugRenderer.render(world, orthographicCamera.combined);
+        if (Gdx.input.isTouched())
+        {
+            if (Gdx.input.getX() > 400) {
+                player.moveRight();
+            } else {
+                player.moveLeft();
+            }
+        }
+        if (Gdx.input.getY()>100)
+        {
+            player.jump();
+        }
+        Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
+        orthographicCamera.unproject(touchPos);
+        player.pointToward(touchPos);
+        s.update();
+        player.draw(orthographicCamera, shapeRenderer);
+        //rayHandler.updateAndRender();
         // Step à garder à la fin du render
         world.step(1 / 40f, 3, 1);
         // Detruire ce qu'il y a à détruire ici ne surtout rien détruire pendant le Box2dworld.step !
@@ -142,9 +169,9 @@ public class PlayingState implements GameState {
     public void dispose() {
 
     }
-    private void centerCamera(int force)
+    private void centerCamera(float x,float y,int force)
     {
-        Vector3 v = orthographicCamera.project(new Vector3(truck.getCenter().x,truck.getCenter().y,0));
+        Vector3 v = orthographicCamera.project(new Vector3(x,y,0));
         orthographicCamera.translate(-((orthographicCamera.viewportWidth*GameClass.PIXEL_TO_METER/2-v.x)/force),-((orthographicCamera.viewportHeight*GameClass.PIXEL_TO_METER/2-v.y)/force));
     }
 }

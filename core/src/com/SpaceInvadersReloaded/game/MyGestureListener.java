@@ -9,11 +9,11 @@ import com.badlogic.gdx.math.Vector2;
  * Created by figiel-paul on 02/06/15.
  */
 public class MyGestureListener implements GestureDetector.GestureListener {
-    private Truck cm;
+    private Player player;
     private OrthographicCamera cam;
-    public void initialize(Truck c,OrthographicCamera cam)
+    public void initialize(Player player,OrthographicCamera cam)
     {
-        cm = c;
+        this.player=player;
         this.cam = cam;
     }
     @Override
@@ -24,14 +24,7 @@ public class MyGestureListener implements GestureDetector.GestureListener {
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-        if (x>Gdx.graphics.getWidth()/2&&y<Gdx.graphics.getHeight()/2)
-        {
-            cm.gearUp();
-        }
-        if (x>Gdx.graphics.getWidth()/2&&y>Gdx.graphics.getHeight()/2)
-        {
-            cm.gearDown();
-        }
+
         return false;
     }
 

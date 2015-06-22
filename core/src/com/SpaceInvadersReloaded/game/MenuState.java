@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.input.GestureDetector;
+
 
 /**
  * Created by figiel-paul on 15/06/15.
@@ -27,21 +27,25 @@ public class MenuState implements GameState{
         // Initialize font
         bitmapFont = new BitmapFont();
         spriteBatch = new SpriteBatch();
-        orthographicCamera = new OrthographicCamera();
-
+        // Init camera
+        orthographicCamera = new OrthographicCamera(Gdx.graphics.getWidth() , Gdx.graphics.getHeight());
+        orthographicCamera.position.set(orthographicCamera.viewportWidth / 2, orthographicCamera.viewportHeight / 2, 0);
+        orthographicCamera.update();
+        spriteBatch.setProjectionMatrix(orthographicCamera.combined);
+        // Init font
         if (Gdx.app.getType()== Application.ApplicationType.Desktop)
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.local("fonts/stocky.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.local("fonts/HACKED.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 30;
+            parameter.size = 40;
             bitmapFont = generator.generateFont(parameter); // font size 12 pixels
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
         else
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/stocky.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/HACKED.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 30;
+            parameter.size = 40;
             bitmapFont = generator.generateFont(parameter); // font size 12 pixels
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
@@ -55,7 +59,7 @@ public class MenuState implements GameState{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         // Render the menu
         spriteBatch.begin();
-        bitmapFont.draw(spriteBatch, "Press to start\nyour journey", Gdx.graphics.getWidth()/2f-100, Gdx.graphics.getHeight()/2f+40);
+        bitmapFont.draw(spriteBatch, "Tap to start\nyour journey", 240, 300 );
         spriteBatch.end();
         // Input
         if (Gdx.input.justTouched())
@@ -66,7 +70,10 @@ public class MenuState implements GameState{
 
     @Override
     public void resize(int width, int height) {
-
+        orthographicCamera.viewportWidth = width/4;
+        orthographicCamera.viewportHeight = height/4;
+        orthographicCamera.position.set(orthographicCamera.viewportWidth / 2, orthographicCamera.viewportHeight / 2, 0);
+        orthographicCamera.update();
     }
 
     @Override

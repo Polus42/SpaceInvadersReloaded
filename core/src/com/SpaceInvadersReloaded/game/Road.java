@@ -89,9 +89,5 @@ public class Road {
     {
         return (float) (Math.cos(playerx/100*(Math.random()/100+1)));
     }
-    private void spawn()
-    {
-
-    }
 
 }

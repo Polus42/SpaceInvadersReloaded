@@ -55,6 +55,10 @@ public class GestionContact implements ContactListener {
             {
                 ((BodyUserData) dataA).setState(BodyUserData.State.IS_ALIEN_DEAD);
             }
+            if ((((BodyUserData) dataA).getState()== BodyUserData.State.IS_DOOR)&&(((BodyUserData) dataB).getState()== BodyUserData.State.IS_PLAYER))
+            {
+                ((BodyUserData) dataA).setState(BodyUserData.State.TO_DESTROY);
+            }
 
 
         }

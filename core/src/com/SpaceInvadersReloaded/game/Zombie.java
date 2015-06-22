@@ -27,8 +27,8 @@ import java.util.ArrayList;
  */
 public class Zombie {
     private World world;
-    private float HAUTEUR = 4;
-    private float LARGEUR = 1.2f;
+    private float HAUTEUR = 3.2f;
+    private float LARGEUR = 1f;
     private Body alienbody;
     private Body alienarm;
     private Body alienhead;
@@ -144,8 +144,6 @@ public class Zombie {
         bodylist.add(alienarm);
         bodylist.add(alienbody);
         bodylist.add(alienhead);
-        // Initialisation de l'affichage
-        //initializeDrawing();
     }
     private void lookRight()
     {
@@ -163,38 +161,16 @@ public class Zombie {
             if (position.x<alienbody.getWorldCenter().x)
             {
                 lookLeft();
-                alienbody.applyForceToCenter(-alienbody.getMass() * 15, 0,true);
+                alienbody.applyForceToCenter(-alienbody.getMass() * 10, 0,true);
                 alienbody.applyAngularImpulse(-alienbody.getAngle()*100,true);
             }
             else
             {
                 lookRight();
-                alienbody.applyForceToCenter(alienbody.getMass() * 15, 0,true);
+                alienbody.applyForceToCenter(alienbody.getMass() * 10, 0,true);
                 alienbody.applyAngularImpulse(-alienbody.getAngle()*100,true);
             }
         }
-    }
-    private void initializeDrawing()
-    {
-        polyBatch = new PolygonSpriteBatch(); // To assign at the beginning
-        Texture textureSolid;
-
-        // Creating the color filling (but textures would work the same way)
-        Pixmap pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pix.setColor(0f,0f,255f,0.5f); // DE is red, AD is green and BE is blue.
-        pix.fill();
-        textureSolid = new Texture(pix);
-        polyReg = new PolygonRegion(new TextureRegion(textureSolid),
-                new float[] {      // Four vertices
-                        0, 0,            // Vertex 0         3--2
-                        LARGEUR, 0,          // Vertex 1         | /|
-                        LARGEUR, HAUTEUR,        // Vertex 2         |/ |
-                        0, HAUTEUR           // Vertex 3         0--1
-                }, new short[] {
-                0, 1, 2,         // Two triangles using vertex indices.
-                0, 2, 3          // Take care of the counter-clockwise direction.
-        });
-        polyBatch = new PolygonSpriteBatch();
     }
     public void draw(OrthographicCamera cam,ShapeRenderer shapeRenderer)
     {

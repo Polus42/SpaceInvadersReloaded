@@ -2,6 +2,7 @@ package com.SpaceInvadersReloaded.game;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
@@ -31,16 +32,18 @@ import com.sun.javafx.geom.RectangularShape;
 
 import java.util.ArrayList;
 
+import box2dLight.ConeLight;
+import box2dLight.RayHandler;
+
 /**
  * Created by figiel-paul on 02/06/15.
  */
 
-public class Truck {
+public class Truck implements Car{
 
     private WheelJoint wheeljoint,wheeljoint2;
     private WeldJoint frontjoint,backjoint;
     private Body wheelbody,wheelbody2,frontbody,backbody,centralbody;
-    private ArrayList<Body> bulletsent = new ArrayList<Body>();
     private World w;
     private float FRICTION =30;
     private float FREQUENCY =7;
@@ -52,6 +55,7 @@ public class Truck {
     private float MAXSPEED = 5;
     private int LIFE = 1000;
     private int GEAR = 0;
+    private ConeLight coneLight;
 
     /**
      * Constructeur.
@@ -60,7 +64,7 @@ public class Truck {
      * @param posX
      * @param posY
      */
-    Truck(World b2w, float posX, float posY)
+    Truck(World b2w, RayHandler rayHandler, float posX, float posY)
     {
         w = b2w;
         // Loading Shapes
@@ -209,6 +213,8 @@ public class Truck {
         // -----------------------------------------
         wheeljoint.setMaxMotorTorque(MAXMOTORTORQUE);
         wheeljoint2.setMaxMotorTorque(MAXMOTORTORQUE);
+        // -----------------------------------------
+        coneLight = new ConeLight(rayHandler, 100, new Color(1,1,1,1), 40, frontbody.getWorldCenter().x, frontbody.getWorldCenter().y, 0, 30);
 
     }
 
@@ -231,7 +237,7 @@ public class Truck {
         {
             GEAR-=1;
             wheeljoint.setMaxMotorTorque(wheeljoint.getMaxMotorTorque() + 1/7f*MAXMOTORTORQUE);
-            wheeljoint2.setMaxMotorTorque(wheeljoint2.getMaxMotorTorque() + 1/7f*MAXMOTORTORQUE);
+            wheeljoint2.setMaxMotorTorque(wheeljoint2.getMaxMotorTorque() + 1 / 7f * MAXMOTORTORQUE);
 
 
             wheeljoint.setMotorSpeed(wheeljoint.getMotorSpeed()+MAXSPEED);
@@ -239,46 +245,6 @@ public class Truck {
 
         }
 
-    }
-
-    /**
-     * Permet de tirer un boulet très dense à une forte velocité
-     * @param w
-     * @param direction Point que le boulet va essayer d'atteindre
-     */
-    public void shoot(World w,Vector2 direction)
-    {
-        // Creation du boulet---------------------------
-        BodyDef bouletDef = new BodyDef();
-
-        bouletDef.type = BodyDef.BodyType.DynamicBody;
-
-        bouletDef.position.set(centralbody.getWorldCenter().x, centralbody.getWorldCenter().y + 1.248f);
-
-        Body bouletbody = w.createBody(bouletDef);
-
-        CircleShape wheelcircle = new CircleShape();
-        wheelcircle.setRadius(0.248f);
-        FixtureDef bouletfixtureDef = new FixtureDef();
-        bouletfixtureDef.shape = wheelcircle;
-        bouletfixtureDef.density = 50f;
-        bouletfixtureDef.friction = 10f;
-        bouletfixtureDef.restitution = 0f; // Make it bounce a little bit
-        bouletfixtureDef.filter.categoryBits=0x0004;
-        bouletfixtureDef.filter.maskBits=0x0002|0x0001;
-        Fixture wheelfixture = bouletbody.createFixture(bouletfixtureDef);
-        wheelcircle.dispose();
-        bouletbody.setBullet(true);
-        bouletbody.setAngularDamping(100);
-        // ------------------------------------------
-        Vector2 v = new Vector2(direction.x-bouletbody.getPosition().x,direction.y-bouletbody.getPosition().y);
-        bouletbody.setLinearVelocity(v.x*10,v.y*10);
-        bouletbody.setUserData(new BodyUserData(BodyUserData.State.IS_BOULET));
-        bulletsent.add(bouletbody);
-    }
-
-    public ArrayList<Body> getBulletsent() {
-        return bulletsent;
     }
 
     /**
@@ -294,7 +260,7 @@ public class Truck {
      * Monde dans lequel evolue le tank
      * @return Monde
      */
-    public World getW() {
+    public World getWorld() {
         return w;
     }
     public void draw(PolygonSpriteBatch psb, OrthographicCamera cam)
@@ -309,5 +275,31 @@ public class Truck {
 
     public int getGEAR() {
         return GEAR;
+    }
+    public void updateLight()
+    {
+        coneLight.setPosition(frontbody.getWorldCenter().x+1, frontbody.getWorldCenter().y);
+        coneLight.setDirection((float) Math.toDegrees(frontbody.getAngle()));
+    }
+    public void draw(OrthographicCamera cam,ShapeRenderer shapeRenderer)
+    {
+        drawFront(cam,shapeRenderer);
+    }
+    public void drawFront(OrthographicCamera cam,ShapeRenderer shapeRenderer)
+    {
+        Vector2 v = new Vector2();
+        for (Fixture f : frontbody.getFixtureList())
+        {
+            for (int i = 0 ; i <((PolygonShape) f.getShape()).getVertexCount();i++ )
+            {
+                ((PolygonShape) f.getShape()).getVertex(i,v);
+                Gdx.app.error("",v.toString());
+                shapeRenderer.setProjectionMatrix(cam.combined);
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                shapeRenderer.setColor(1, 1, 1, 1);
+                shapeRenderer.rect(v.x, v.y, 1, 1);
+                shapeRenderer.end();
+            }
+        }
     }
 }

@@ -18,7 +18,10 @@ public class BodyUserData {
         IS_CENTER_TOUCHED,
         IS_BOULET,
         IS_ALIEN_DEAD,
-        IS_ALIEN;
+        IS_ALIEN,
+        IS_PLAYER,
+        IS_DOOR,
+        IS_DOOR_TOUCHED;
     }
 
     /**
